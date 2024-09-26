@@ -28,6 +28,9 @@ type Entity struct {
 	propCache        map[string]st.Property
 }
 
+// func (*Entity) GobDecode([]byte) error    { return nil }
+// func (Entity) GobEncode() ([]byte, error) { return nil, nil }
+
 func (e *Entity) ServerClass() st.ServerClass {
 	return e.class
 }

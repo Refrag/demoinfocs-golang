@@ -312,8 +312,8 @@ const (
 // This also includes the skin and some additional data.
 type Equipment struct {
 	Type   EquipmentType // The type of weapon which the equipment instantiates.
-	Entity st.Entity     // The game entity instance
-	Owner  *Player       // The player carrying the equipment, not necessarily the buyer.
+	Entity st.Entity     `json:"-"` // The game entity instance
+	Owner  *Player       `json:"-"` // The player carrying the equipment, not necessarily the buyer.
 	// E.g. 'models/weapons/w_rif_m4a1_s.mdl'.
 	// Used internally to differentiate alternative weapons (M4A4 / M4A1-S etc.) for Source 1 demos.
 	// It's always an empty string with Source 2 demos, you should use Type to know which weapon it is.

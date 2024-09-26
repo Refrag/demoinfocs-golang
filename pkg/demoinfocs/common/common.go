@@ -131,7 +131,7 @@ type TeamState struct {
 	Entity st.Entity
 
 	// Terrorist TeamState for CTs, CT TeamState for Terrorists
-	Opponent *TeamState
+	Opponent *TeamState `json:"-"`
 }
 
 // Team returns the team for which the TeamState contains data.
