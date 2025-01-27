@@ -71,7 +71,18 @@ func (p *parser) ParseHeader() (common.DemoHeader, error) {
 	case "PBDEMS2":
 		p.bitReader.Skip(8 << 3) // skip 8 bytes
 
-		p.stParser = sendtables2.NewParser()
+		var warnFunc func(error)
+
+		if p.ignorePacketEntitiesPanic {
+			warnFunc = func(err error) {
+				p.eventDispatcher.Dispatch(events.ParserWarn{
+					Type:    events.WarnTypePacketEntitiesPanic,
+					Message: fmt.Sprintf("encountered PacketEntities panic: %v", err),
+				})
+			}
+		}
+
+		p.stParser = sendtables2.NewParser(warnFunc)
 
 		p.stParser.OnEntity(p.onEntity)
 
@@ -382,26 +393,15 @@ func (p *parser) parseFrameS2() bool {
 	p.msgQueue <- msg
 
 	switch m := msg.(type) {
-	case *msgs2.CDemoFileHeader:
-		p.handleDemoFileHeader(m)
-
 	case *msgs2.CDemoPacket:
 		p.handleDemoPacket(m)
 
 	case *msgs2.CDemoFullPacket:
-		p.handleFullPacket(m)
+		p.msgQueue <- m.StringTable
 
-	case *msgs2.CDemoSendTables:
-		p.handleSendTables(m)
-
-	case *msgs2.CDemoClassInfo:
-		p.handleClassInfo(m)
-
-	case *msgs2.CDemoStringTables:
-		p.handleStringTables(m)
-
-	case *msgs2.CDemoFileInfo:
-		p.handleFileInfo(m)
+		if m.Packet.GetData() != nil {
+			p.handleDemoPacket(m.Packet)
+		}
 	}
 
 	// Queue up some post processing

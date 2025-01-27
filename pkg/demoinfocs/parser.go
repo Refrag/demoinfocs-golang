@@ -84,6 +84,7 @@ type parser struct {
 	errLock                         sync.Mutex       // Used to sync up error mutations between parsing & handling go-routines
 	decryptionKey                   []byte           // Stored in `match730_*.dem.info` see MatchInfoDecryptionKey().
 	source2FallbackGameEventListBin []byte           // sv_hibernate_when_empty bug workaround
+	ignorePacketEntitiesPanic       bool             // Used to ignore PacketEntities parsing panics (some POV demos seem to have broken rare broken PacketEntities)
 	/**
 	 * Set to the client slot of the recording player.
 	 * Always -1 for GOTV demos.
@@ -361,15 +362,16 @@ type ParserConfig struct {
 	// It's used when the game event list is not found in the demo file.
 	// This can happen due to a CS2 bug with sv_hibernate_when_empty.
 	Source2FallbackGameEventListBin []byte
+
+	// IgnorePacketEntitiesPanic tells the parser to ignore PacketEntities parsing panics.
+	// This is required as a workaround for some POV demos that seem to contain rare PacketEntities parsing issues.
+	IgnorePacketEntitiesPanic bool
 }
 
 // DefaultParserConfig is the default Parser configuration used by NewParser().
 var DefaultParserConfig = ParserConfig{
 	MsgQueueBufferSize: -1,
 }
-
-//go:embed s2_CMsgSource1LegacyGameEventList.pb.bin
-var defaultSource2FallbackGameEventListBin []byte
 
 // NewParserWithConfig returns a new Parser with a custom configuration.
 //
@@ -394,10 +396,7 @@ func NewParserWithConfig(demostream io.Reader, config ParserConfig) Parser {
 	p.recordingPlayerSlot = -1
 	p.disableMimicSource1GameEvents = config.DisableMimicSource1Events
 	p.source2FallbackGameEventListBin = config.Source2FallbackGameEventListBin
-
-	if p.source2FallbackGameEventListBin == nil {
-		p.source2FallbackGameEventListBin = defaultSource2FallbackGameEventListBin
-	}
+	p.ignorePacketEntitiesPanic = config.IgnorePacketEntitiesPanic
 
 	dispatcherCfg := dp.Config{
 		PanicHandler: func(v any) {
@@ -415,7 +414,6 @@ func NewParserWithConfig(demostream io.Reader, config ParserConfig) Parser {
 	p.msgDispatcher.RegisterHandler(p.handleUpdateStringTableS1)
 	p.msgDispatcher.RegisterHandler(p.handleUserMessage)
 	p.msgDispatcher.RegisterHandler(p.handleSetConVar)
-	p.msgDispatcher.RegisterHandler(p.handleFrameParsed)
 	p.msgDispatcher.RegisterHandler(p.handleServerInfo)
 	p.msgDispatcher.RegisterHandler(p.handleEncryptedData)
 	p.msgDispatcher.RegisterHandler(p.gameState.handleIngameTickNumber)
@@ -430,6 +428,12 @@ func NewParserWithConfig(demostream io.Reader, config ParserConfig) Parser {
 	p.msgDispatcher.RegisterHandler(p.handleServerRankUpdate)
 	p.msgDispatcher.RegisterHandler(p.handleMessageSayText)
 	p.msgDispatcher.RegisterHandler(p.handleMessageSayText2)
+	p.msgDispatcher.RegisterHandler(p.handleSendTables)
+	p.msgDispatcher.RegisterHandler(p.handleFileInfo)
+	p.msgDispatcher.RegisterHandler(p.handleDemoFileHeader)
+	p.msgDispatcher.RegisterHandler(p.handleClassInfo)
+	p.msgDispatcher.RegisterHandler(p.handleStringTables)
+	p.msgDispatcher.RegisterHandler(p.handleFrameParsed)
 
 	if config.MsgQueueBufferSize >= 0 {
 		p.initMsgQueue(config.MsgQueueBufferSize)
