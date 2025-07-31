@@ -4,8 +4,7 @@ import (
 	"github.com/golang/geo/r3"
 	"github.com/stretchr/testify/mock"
 
-	bitread "github.com/markus-wa/demoinfocs-golang/v4/internal/bitread"
-	st "github.com/markus-wa/demoinfocs-golang/v4/pkg/demoinfocs/sendtables"
+	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
 )
 
 // NewEntityWithProperty creates and returns an entity with a single mocked property.
@@ -77,11 +76,6 @@ func (e *Entity) PropertyValueMust(name string) st.PropertyValue {
 	args := e.Called(name)
 
 	return args.Get(0).(st.PropertyValue)
-}
-
-// ApplyUpdate is a mock-implementation of Entity.ApplyUpdate().
-func (e *Entity) ApplyUpdate(reader *bitread.BitReader) {
-	e.Called(reader)
 }
 
 // Position is a mock-implementation of Entity.Position().

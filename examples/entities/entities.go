@@ -5,10 +5,10 @@ import (
 	_ "image/jpeg"
 	"os"
 
-	ex "github.com/markus-wa/demoinfocs-golang/v4/examples"
-	demoinfocs "github.com/markus-wa/demoinfocs-golang/v4/pkg/demoinfocs"
-	events "github.com/markus-wa/demoinfocs-golang/v4/pkg/demoinfocs/events"
-	st "github.com/markus-wa/demoinfocs-golang/v4/pkg/demoinfocs/sendtables"
+	ex "github.com/markus-wa/demoinfocs-golang/v5/examples"
+	demoinfocs "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs"
+	events "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/events"
+	st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
 )
 
 // Run like this: go run entities.go -demo /path/to/demo.dem
@@ -23,13 +23,13 @@ func main() {
 	p.RegisterEventHandler(func(events.DataTablesParsed) {
 		p.ServerClasses().FindByName("CWeaponAWP").OnEntityCreated(func(ent st.Entity) {
 			ent.Property("m_hOwnerEntity").OnUpdate(func(val st.PropertyValue) {
-				x := p.GameState().Participants().FindByHandle64(val.S2UInt64())
+				x := p.GameState().Participants().FindByHandle64(val.UInt64())
 				if x != nil {
 					var prev string
-					prevHandle := ent.Property("m_hPrevOwner").Value().S2UInt64()
+					prevHandle := ent.Property("m_hPrevOwner").Value().UInt64()
 					prevPlayer := p.GameState().Participants().FindByHandle64(prevHandle)
 					if prevPlayer != nil {
-						if prevHandle != val.S2UInt64() {
+						if prevHandle != val.UInt64() {
 							prev = prevPlayer.Name + "'s"
 						} else {
 							prev = "his dropped"

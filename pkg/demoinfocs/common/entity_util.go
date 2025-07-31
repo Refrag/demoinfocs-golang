@@ -1,6 +1,6 @@
 package common
 
-import st "github.com/markus-wa/demoinfocs-golang/v4/pkg/demoinfocs/sendtables"
+import st "github.com/markus-wa/demoinfocs-golang/v5/pkg/demoinfocs/sendtables"
 
 func getInt(entity st.Entity, propName string) int {
 	if entity == nil {
@@ -15,7 +15,7 @@ func getUInt64(entity st.Entity, propName string) uint64 {
 		return 0
 	}
 
-	return entity.PropertyValueMust(propName).S2UInt64()
+	return entity.PropertyValueMust(propName).UInt64()
 }
 
 func getFloat(entity st.Entity, propName string) float32 {
