@@ -170,6 +170,7 @@ func newGameEventHandler(parser *parser, ignoreBombsiteIndexNotFound bool) gameE
 		"flashbang_detonate":              geh.flashBangDetonate,                 // Flash exploded
 		"firstbombs_incoming_warning":     nil,                                   // First wave artillery incoming (Danger zone mode)
 		"grenade_thrown":                  nil,                                   // CS2 only, not reliable as it's not always present in demos and always fired. You should use "weapon_fire".
+		"grenade_bounce":                  nil,                                   // Renown fix
 		"hegrenade_detonate":              geh.heGrenadeDetonate,                 // HE exploded
 		"hostage_killed":                  geh.hostageKilled,                     // Hostage killed
 		"hostage_hurt":                    geh.hostageHurt,                       // Hostage hurt
@@ -228,6 +229,7 @@ func newGameEventHandler(parser *parser, ignoreBombsiteIndexNotFound bool) gameE
 		"round_time_warning":             nil,                              // Round time warning
 		"server_cvar":                    nil,                              // Dunno
 		"show_survival_respawn_status":   nil,                              // Dunno, (Danger zone mode)
+		"show_deathpanel":                nil,                              // Renown fix
 		"survival_paradrop_spawn":        nil,                              // A paradrop is coming (Danger zone mode)
 		"smokegrenade_detonate":          geh.smokeGrenadeDetonate,         // Smoke popped
 		"smokegrenade_expired":           geh.smokeGrenadeExpired,          // Smoke expired
