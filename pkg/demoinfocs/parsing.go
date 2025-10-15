@@ -18,11 +18,8 @@ import (
 )
 
 const (
-	playerWeaponPrefix    = "m_hMyWeapons."
-	playerWeaponPrefixS2  = "m_pWeaponServices.m_hMyWeapons."
-	playerWeaponPrePrefix = "bcc_nonlocaldata."
-	gameRulesPrefix       = "cs_gamerules_data"
-	gameRulesPrefixS2     = "m_pGameRules"
+	playerWeaponPrefixS2 = "m_pWeaponServices.m_hMyWeapons"
+	gameRulesPrefixS2    = "m_pGameRules"
 )
 
 // Parsing errors
@@ -273,6 +270,12 @@ func (p *parser) parseFrame() bool {
 			tick = 0
 		}
 
+		if msgType == msg.EDemoCommands_DEM_Stop {
+			p.msgQueue <- ingameTickNumber(int32(tick))
+			p.msgQueue <- frameParsedToken
+			return false
+		}
+
 		size = p.bitReader.ReadVarInt32()
 	}
 
@@ -282,7 +285,7 @@ func (p *parser) parseFrame() bool {
 	if msgCreator == nil {
 		p.eventDispatcher.Dispatch(events.ParserWarn{
 			Message: fmt.Sprintf("skipping unknown demo commands message type with value %d", msgType),
-			Type:    events.WarnUnknownDemoCommandMessageType,
+			Type:    events.WarnTypeUnknownDemoCommandMessageType,
 		})
 		p.bitReader.Skip(int(size) << 3)
 
