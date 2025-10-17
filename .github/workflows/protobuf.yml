@@ -2,7 +2,7 @@ name: Update Protobufs
 on:
   workflow_dispatch: {}
   schedule:
-    - cron: '0 0 * * *'
+    - cron: "0 0 * * *"
 jobs:
   protobuf:
     name: Update Protobufs
@@ -32,21 +32,21 @@ jobs:
       - name: Install Protobuf tools
         if: env.PROTOBUFS_CHANGED == 'true'
         run: |
-            sudo apt-get update
-            sudo apt-get install unzip
+          sudo apt-get update
+          sudo apt-get install unzip
 
-            wget -O /tmp/protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-x86_64.zip
-            unzip /tmp/protoc.zip -d /tmp/protoc
+          wget -O /tmp/protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v21.3/protoc-21.3-linux-x86_64.zip
+          unzip /tmp/protoc.zip -d /tmp/protoc
 
-            go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28
 
       - name: Generate Go code
         if: env.PROTOBUFS_CHANGED == 'true'
         run: |
-            cd pkg/demoinfocs/msg
+          cd pkg/demoinfocs/msg
 
-            export PATH=/tmp/protoc/bin:$PATH
-            ./generate.sh
+          export PATH=/tmp/protoc/bin:$PATH
+          ./generate.sh
 
       - name: Commit changes
         if: env.PROTOBUFS_CHANGED == 'true'
@@ -59,7 +59,7 @@ jobs:
         if: env.PROTOBUFS_CHANGED == 'true'
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
+          #token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}
           title: "protobuf: updated to ${{ env.COMMIT_SHA }}"
           base: master
           branch: update-protobufs
