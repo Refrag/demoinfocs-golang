@@ -192,6 +192,7 @@ There is one caveat however: Beta features - which are marked as such via commen
 ## Services, Projects & Companies Using demoinfocs-golang
 
 - [noesis.gg](https://www.noesis.gg/) - A suite of explorative tools to help you analyze and improve your CS2 performance
+- [fastcup.net](https://fastcup.net/) — CS2 matchmaking & tournament platform with match stats, demo analysis, and automatic highlight rendering
 - [esportal.com](https://esportal.com/) - An alternative Matchmaking service that aims to provide a friendly environment free from trolls and misbehaving individuals
 - [pglesports.com](https://www.pglesports.com/) - Premier eSports tournaments and circuits for massive audiences
 - [hltv.org](https://www.hltv.org/) - Leading Counter-Strike site featuring news, demos, pictures, statistics, on-site coverage and more
@@ -202,6 +203,7 @@ There is one caveat however: Beta features - which are marked as such via commen
 - [cs2lens.com](https://www.cs2lens.com/) - Professional CS2 demo replayer and analysis tool
 - [awpy](https://github.com/pnxenopoulos/awpy) - A wrapper for the Golang parser in Python
 - [CS2VoiceData](https://github.com/DandrewsDev/CS2VoiceData) - Extract voice communications from demos
+- [CSC](https://csconfederation.com/) - A free league in NA providing a casual yet competitive environment
 
 ### CS:GO projects (may no longer work with CS2)
 

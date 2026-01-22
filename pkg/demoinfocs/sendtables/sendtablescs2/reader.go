@@ -20,11 +20,6 @@ func newReader(buf []byte) *reader {
 	return &reader{buf, uint32(len(buf)), 0, 0, 0}
 }
 
-// remBits calculates the number of unread bits in the buffer
-func (r *reader) remBits() uint32 {
-	return r.remBytes() + r.bitCount
-}
-
 func (r *reader) position() string {
 	if r.bitCount > 0 {
 		return fmt.Sprintf("%d.%d", r.pos-1, 8-r.bitCount)
@@ -284,13 +279,13 @@ func (r *reader) read3BitNormal() []float32 {
 	ret := []float32{0.0, 0.0, 0.0}
 
 	hasX := r.readBoolean()
-	haxY := r.readBoolean()
+	hasY := r.readBoolean()
 
 	if hasX {
 		ret[0] = r.readNormal()
 	}
 
-	if haxY {
+	if hasY {
 		ret[1] = r.readNormal()
 	}
 

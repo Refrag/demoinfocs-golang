@@ -14,22 +14,23 @@ import (
 type Player struct {
 	demoInfoProvider demoInfoProvider // provider for demo info such as tick-rate or current tick
 
-	SteamID64     uint64             // 64-bit representation of the user's Steam ID. See https://developer.valvesoftware.com/wiki/SteamID
-	UserID        int                // Mostly used in game-events to address this player
-	Name          string             // Steam / in-game user name
-	Inventory     map[int]*Equipment // All weapons / equipment the player is currently carrying. See also Weapons().
-	EntityID      int                // Usually the same as Entity.ID() but may be different between player death and re-spawn.
-	Entity        st.Entity          // May be nil between player-death and re-spawn
-	FlashDuration float32            // Blindness duration from the flashbang currently affecting the player (seconds)
-	FlashTick     int                // In-game tick at which the player was last flashed
-	TeamState     *TeamState         // When keeping the reference make sure you notice when the player changes teams
-	Team          Team               // Team identifier for the player (e.g. TeamTerrorists or TeamCounterTerrorists).
-	IsBot         bool               // True if this is a bot-entity. See also IsControllingBot and ControlledBot().
-	IsConnected   bool
-	IsDefusing    bool
-	IsPlanting    bool
-	IsReloading   bool
-	IsUnknown     bool // Used to identify unknown/broken players. see https://github.com/markus-wa/demoinfocs-golang/issues/162
+	SteamID64           uint64             // 64-bit representation of the user's Steam ID. See https://developer.valvesoftware.com/wiki/SteamID
+	UserID              int                // Mostly used in game-events to address this player
+	Name                string             // Steam / in-game user name
+	Inventory           map[int]*Equipment // All weapons / equipment the player is currently carrying. See also Weapons().
+	EntityID            int                // Usually the same as Entity.ID() but may be different between player death and re-spawn.
+	Entity              st.Entity          // May be nil between player-death and re-spawn
+	FlashDuration       float32            // Blindness duration from the flashbang currently affecting the player (seconds)
+	FlashTick           int                // In-game tick at which the player was last flashed
+	TeamState           *TeamState         // When keeping the reference make sure you notice when the player changes teams
+	Team                Team               // Team identifier for the player (e.g. TeamTerrorists or TeamCounterTerrorists).
+	IsBot               bool               // True if this is a bot-entity. See also IsControllingBot and ControlledBot().
+	IsConnected         bool
+	IsDefusing          bool
+	IsPlanting          bool
+	IsReloading         bool
+	IsUnknown           bool   // Used to identify unknown/broken players. see https://github.com/markus-wa/demoinfocs-golang/issues/162
+	ButtonsPressedState uint64 // Pressed buttons state represented as an uint64. You can use IsPressingButton(buttonMask) to check for specific buttons.
 }
 
 func (p *Player) PlayerPawnEntity() st.Entity {
@@ -201,6 +202,10 @@ func (p *Player) IsSpottedBy(other *Player) bool {
 	if p.Entity == nil {
 		return false
 	}
+	pawnEntity := p.PlayerPawnEntity()
+	if pawnEntity == nil {
+		return false
+	}
 
 	clientSlot := other.EntityID - 1
 	bit := uint(clientSlot)
@@ -208,10 +213,10 @@ func (p *Player) IsSpottedBy(other *Player) bool {
 	var mask st.Property
 
 	if bit < 32 {
-		mask = p.PlayerPawnEntity().Property("m_bSpottedByMask.0000")
+		mask = pawnEntity.Property("m_bSpottedByMask.0000")
 	} else {
 		bit -= 32
-		mask = p.PlayerPawnEntity().Property("m_bSpottedByMask.0001")
+		mask = pawnEntity.Property("m_bSpottedByMask.0001")
 	}
 
 	return (mask.Value().UInt64() & (1 << bit)) != 0
@@ -359,7 +364,17 @@ func (p *Player) Money() int {
 
 // EquipmentValueCurrent returns the current value of equipment in the player's inventory.
 func (p *Player) EquipmentValueCurrent() int {
-	return int(getUInt64(p.PlayerPawnEntity(), "m_unCurrentEquipmentValue"))
+	pawnEntity := p.PlayerPawnEntity()
+	if pawnEntity == nil {
+		return 0
+	}
+
+	equipmentValue, exists := pawnEntity.PropertyValue("m_unCurrentEquipmentValue")
+	if !exists {
+		return 0
+	}
+
+	return int(equipmentValue.UInt64()) //#nosec G115
 }
 
 // EquipmentValueRoundStart returns the value of equipment in the player's inventory at the time of the round start.
@@ -557,6 +572,12 @@ func (p *Player) UtilityDamage() int {
 	}
 
 	return value.Int()
+}
+
+// IsPressingButton returns true if the player is currently pressing the given button.
+// ! "Button" doesn't refer to the key on the keyboard/mouse but rather to an in-game action such as "move forward", "attack", "jump", etc.
+func (p *Player) IsPressingButton(buttonBitMask ButtonBitMask) bool {
+	return (p.ButtonsPressedState & uint64(buttonBitMask)) != 0
 }
 
 // MoneySpentTotal returns the total amount of money the player has spent in the current match.
