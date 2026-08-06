@@ -416,6 +416,10 @@ func (e *Entity) readFields(r *reader, paths *[]*fieldPath) {
 		val := decoder(r)
 
 		if base && (f.model == fieldModelVariableArray || f.model == fieldModelVariableTable) {
+			if size := val.(uint64); size > maxFieldIndex {
+				_panicf("variable collection size %d out of range [0, %d] for field %s: corrupt or desynced demo bitstream", size, maxFieldIndex, name)
+			}
+
 			fs := fieldState{}
 
 			oldFS, _ := e.state.get(fp).(*fieldState)
